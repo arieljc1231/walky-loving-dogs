@@ -1,0 +1,8 @@
+# node modules
+**/node_modules
+
+# pasta de build do React
+frontend/build
+
+# env vars
+**/.env
