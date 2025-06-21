@@ -1,0 +1,317 @@
+@baseUrl = http://localhost:5000/api
+
+########################################
+# 1) ADMIN
+########################################
+
+### Criar Admin
+POST {{baseUrl}}/admins
+Content-Type: application/json
+
+{
+  "nome": "Admin Example",
+  "email": "admin@example.com",
+  "senha": "senha123",
+  "nivelAcesso": "admin"
+}
+
+### Listar todos os Admins
+GET {{baseUrl}}/admins
+
+### Listar Admin por ID
+# Substitua {{adminId}} pelo _id retornado acima
+GET {{baseUrl}}/admins/6855b1260fa10083ca02526a
+
+### Editar Admin
+PUT {{baseUrl}}/admins/6855c46ae1229b88d1406bfe
+Content-Type: application/json
+
+{
+  "senha": "123456"
+}
+
+########################################
+# 2) TUTOR
+########################################
+
+### Criar Tutor
+POST {{baseUrl}}/tutores
+Content-Type: application/json
+
+{
+  "nome": "Tutor Example",
+  "telefone": "11999999999",
+  "email": "tutor@example.com",
+  "cpf": "12345678901"
+}
+
+### Listar todos os Tutores
+GET {{baseUrl}}/tutores
+
+### Listar Tutor por ID
+# Substitua {{tutorId}} pelo _id retornado acima
+GET {{baseUrl}}/tutores/6855b1710fa10083ca025270
+
+### Editar Tutor
+PUT {{baseUrl}}/tutores/6856388c76a4bfc209a1bce2
+Content-Type: application/json
+
+{
+  "senha": "123456"
+}
+
+########################################
+# 3) DONO
+########################################
+
+### Criar Dono (com todos os campos obrigatórios)
+POST {{baseUrl}}/donos
+Content-Type: application/json
+
+{
+  "nome": "Dono Example",
+  "telefone": "11888888888",
+  "email": "dono@example.com",
+  "cpf": "10987654321",
+  "senha": "senha12345",
+  "responsavel": false,
+  "endereco": "Rua Exemplo, 123"
+}
+
+### Listar todos os Donos
+GET {{baseUrl}}/donos
+
+### Listar Dono por ID
+# Substitua {{donoId}} pelo _id retornado acima
+GET {{baseUrl}}/donos/6855b2250fa10083ca025276
+
+### Editar Dono
+PUT {{baseUrl}}/donos/6855b2250fa10083ca025276
+Content-Type: application/json
+
+{
+  "email": "dono.editado@example.com"
+}
+
+########################################
+# 4) PET
+########################################
+
+### Criar Pet (com **raca** e demais campos obrigatórios)
+POST {{baseUrl}}/pets
+Content-Type: application/json
+
+{
+  "nome": "Rex",
+  "especie": "Cachorro",
+  "raca": "Labrador",
+  "peso": 10,
+  "idade": 3,
+  "porte": "Médio",
+  "sexo": "Macho",
+  "cor": "Marrom",
+  "castrado": true,
+  "dataCadastro": "2025-06-20T14:00:00.000Z",
+  "carteiraVacinacao": true,
+  "tutor": "6856388c76a4bfc209a1bce2",
+  "dono": "6855c56de1229b88d1406c39",
+  "criador": "6855c46ae1229b88d1406bfe"
+}
+
+### Listar todos os Pets
+GET {{baseUrl}}/pets
+
+### Listar Pet por ID
+# Substitua {{petId}} pelo _id retornado acima
+GET {{baseUrl}}/pets/6855b521e1229b88d1406908
+
+### Editar Pet
+PUT {{baseUrl}}/pets/6855b521e1229b88d1406908
+Content-Type: application/json
+
+{
+  "nome": "Rex Atualizado"
+}
+
+########################################
+# 5) EVENTO DO PET
+########################################
+
+### Criar Evento
+POST {{baseUrl}}/eventos
+Content-Type: application/json
+
+{
+  "tipo": "Passeio",
+  "pet": "6855b521e1229b88d1406908",
+  "tutor": "6855b1710fa10083ca025270",
+  "admin": "6855b1260fa10083ca02526a",
+  "dataEntrada": "2025-06-20T14:00:00.000Z",
+  "observacoes": "Passeio no parque"
+}
+
+### Listar todos os Eventos
+GET {{baseUrl}}/eventos
+
+### Listar Eventos por Pet
+# Filtra todos eventos do pet {{petId}}
+GET {{baseUrl}}/eventos/pet/68563a785eb9144ce39a3d41
+
+### Editar Evento (Checkout)
+PUT {{baseUrl}}/eventos/6855b5cce1229b88d140691b/checkout
+Content-Type: application/json
+
+{
+  "dataSaida": "2025-06-20T15:30:00.000Z",
+  "observacoes": "Passeio finalizado"
+}
+
+### 1) Cadastrar Tutor
+POST http://localhost:5000/api/tutores
+Content-Type: application/json
+
+{
+  "nome": "João Tutor",
+  "email": "joao.tutor@example.com",
+  "senha": "123456",
+  "telefone": "123456789",
+  "cpf": "12345678901",
+  "endereco": "Rua Exemplo, 123",
+  "dataNascimento": "1990-01-01"
+}
+
+###
+
+### 2) Login do Tutor
+POST http://localhost:5000/api/tutores/login
+Content-Type: application/json
+
+{
+  "email": "joao.tutor@example.com",
+  "senha": "123456"
+}
+
+###
+
+# — copie o campo “token” da resposta abaixo —
+
+###
+
+### 3) Criar Evento (associando ao tutor)
+POST http://localhost:5000/api/eventos
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "tipo": "Hospedagem",
+  "pet":    "{{petId}}",
+  "tutor":  "{{tutorId}}",
+  "dono":   "{{donoId}}",
+  "admin":  "{{adminId}}",
+  "dataEntrada": "2025-06-21T10:00:00.000Z"
+}
+
+###
+
+### 4) Listar Eventos do Tutor
+GET http://localhost:5000/api/eventos?tutor={{tutorId}}
+Authorization: Bearer {{token}}
+
+### 1) Login do Tutor
+POST http://localhost:5000/api/tutores/login
+Content-Type: application/json
+
+{
+  "email": "joao.tutor@example.com",
+  "senha": "123456"
+}
+
+###
+
+### 2) Listar Eventos do Tutor
+GET http://localhost:5000/api/eventos?tutor={{tutorId}}
+Authorization: Bearer {{token}}
+
+### 2) Criar Evento para o Tutor
+POST http://localhost:5000/api/eventos
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NTYzODhjNzZhNGJmYzIwOWExYmNlMiIsInJvbGUiOiJ0dXRvciIsImlhdCI6MTc1MDQ4MTQxMCwiZXhwIjoxNzUwNTEwMjEwfQ.gdjpDw__GdgMTIPiBxo6NJxVXX0h9rs27vLSlhz7v6I
+
+{
+  "tipo": "Hospedagem",
+  "pet":    "68563a785eb9144ce39a3d41",
+  "tutor": "6856388c76a4bfc209a1bce2",
+  "dono": "6855c56de1229b88d1406c39",
+  "criador": "6855c46ae1229b88d1406bfe",
+  "dataEntrada": "2025-06-21T10:00:00.000Z"
+}
+
+### 3) Listar Eventos do Tutor
+GET http://localhost:5000/api/eventos?tutor={{tutorId}}
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NTYzODhjNzZhNGJmYzIwOWExYmNlMiIsInJvbGUiOiJ0dXRvciIsImlhdCI6MTc1MDQ4MTQxMCwiZXhwIjoxNzUwNTEwMjEwfQ.gdjpDw__GdgMTIPiBxo6NJxVXX0h9rs27vLSlhz7v6I
+
+### Checkout de Evento
+PUT http://localhost:5000/api/eventos/68563aac5eb9144ce39a3d44/checkout
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4NTYzODhjNzZhNGJmYzIwOWExYmNlMiIsInJvbGUiOiJ0dXRvciIsImlhdCI6MTc1MDQ4MTQxMCwiZXhwIjoxNzUwNTEwMjEwfQ.gdjpDw__GdgMTIPiBxo6NJxVXX0h9rs27vLSlhz7v6I
+
+{
+  "status": "Finalizado",
+  "dataSaida": "2025-06-21T15:30:00.000Z",
+  "observacoes": "Checkout realizado com sucesso"
+}
+
+### Atualizar Senha do Tutor
+PUT http://localhost:5000/api/tutores/6856388c76a4bfc209a1bce2
+Content-Type: application/json
+
+{
+  "senha": "novaSenhaSegura123"
+}
+
+### Criar evento via TUTOR (check-in)
+POST http://localhost:5000/api/eventos
+Content-Type: application/json
+
+{
+  "tipo": "Hospedagem",
+  "pet": "68563a785eb9144ce39a3d41",
+  "dono": "6855c56de1229b88d1406c39",
+  "tutor": "6856388c76a4bfc209a1bce2",
+  "observacoes": "Check-in feito pelo tutor no painel dele"
+}
+
+### Criar evento via TUTOR (check-in)
+POST http://localhost:5000/api/eventos
+Content-Type: application/json
+
+{
+  "tipo": "Hospedagem",
+  "pet": "68563a785eb9144ce39a3d41",
+  "dono": "6855c56de1229b88d1406c39",
+  "tutor": "6856388c76a4bfc209a1bce2",
+  "dataEntrada": "2025-06-21T16:00:00.000Z",
+  "observacoes": "TESTE PELO HTTP @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
+}
+
+
+###
+
+### Listar todos os eventos
+GET http://localhost:5000/api/eventos
+
+###
+
+### Listar eventos de um pet específico
+GET http://localhost:5000/api/eventos/pet/68563a785eb9144ce39a3d41
+
+###
+
+### Fazer check-out de um evento (finalizar)
+PUT http://localhost:5000/api/eventos/PASTE_EVENTO_ID_HERE/checkout
+Content-Type: application/json
+
+{
+  "dataSaida": "2025-06-21T14:00:00.000Z",
+  "status": "Finalizado"
+}
