@@ -14,16 +14,16 @@ const transporter = nodemailer.createTransport({
 async function sendWelcomeEmail(to, name, role) {
   // Define a URL de login conforme o perfil
   let portalUrl;
-  switch (role) {
-    case 'dono':
-      portalUrl = 'http://seu-dominio.com/login-dono';
-      break;
-    case 'tutor':
-      portalUrl = 'http://seu-dominio.com/login-tutor';
-      break;
-    default:
-      portalUrl = 'http://seu-dominio.com/login-cliente';
-  }
+switch (role) {
+  case 'dono':
+    portalUrl = 'https://walky-loving-dogs.vercel.app/login-cliente';  // Dono acessa aqui
+    break;
+  case 'tutor':
+    portalUrl = 'https://walky-loving-dogs.vercel.app/login-tutor';    // Tutor acessa aqui
+    break;
+  default:
+    portalUrl = 'https://walky-loving-dogs.vercel.app/login-cliente';  // Default também aponta para cliente
+}
 
   const subject = 'Bem-vindo ao WalkyLovingDogs!';
   const text =
