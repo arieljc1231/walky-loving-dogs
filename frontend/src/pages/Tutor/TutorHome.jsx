@@ -6,10 +6,10 @@ import api from '../../services/api';
 
 const formatDateTime = iso =>
   new Date(iso).toLocaleString('pt-BR', {
-    day:    '2-digit',
-    month:  '2-digit',
-    year:   'numeric',
-    hour:   '2-digit',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
     minute: '2-digit',
     second: '2-digit',
   });
@@ -20,35 +20,58 @@ export default function TutorHome() {
   const [selectedPet, setSelectedPet] = useState(null);
   const [eventos, setEventos] = useState([]);
 
-  // Busca pets e já seleciona o primeiro
   useEffect(() => {
     const tutorJson = localStorage.getItem('usuario_tutor');
     if (!tutorJson) {
+      console.warn('⚠️ Nenhum tutor encontrado no localStorage');
       navigate('/login-tutor');
       return;
     }
-    const tutor = JSON.parse(tutorJson);
-    api.defaults.headers.common['Authorization'] = 'Bearer ' + tutor.token;
 
-    api.get(`/pets?tutor=${tutor._id}`)
-      .then(({ data }) => {
+    const tutor = JSON.parse(tutorJson);
+    console.log('👤 Tutor logado:', tutor);
+
+    if (tutor.token) {
+      api.defaults.headers.common['Authorization'] = 'Bearer ' + tutor.token;
+    } else {
+      console.warn('⚠️ Token do tutor ausente');
+    }
+
+    // Carrega pets do tutor
+    api.get(`/pets/tutor/${tutor._id}`)
+      .then(response => {
+        console.log('📥 Resposta da API de pets:', response);
+        const data = response.data;
         setPets(data);
+        console.log('🐶 Pets recebidos e setados no estado:', data);
+
         if (data.length > 0) {
           setSelectedPet(data[0]._id);
+          console.log('✅ Primeiro pet selecionado:', data[0]._id);
+        } else {
+          console.warn('⚠️ Nenhum pet encontrado para o tutor.');
         }
       })
-      .catch(console.error);
+      .catch(err => {
+        console.error('❌ Erro ao buscar pets do tutor:', err);
+      });
   }, [navigate]);
 
-  // Busca eventos sempre pelo pet selecionado
   useEffect(() => {
     if (!selectedPet) {
       setEventos([]);
+      console.log('ℹ️ Nenhum pet selecionado, limpando eventos.');
       return;
     }
+
     api.get(`/eventos/pet/${selectedPet}`)
-      .then(({ data }) => setEventos(data))
-      .catch(console.error);
+      .then(({ data }) => {
+        console.log('📋 Eventos recebidos:', data);
+        setEventos(data);
+      })
+      .catch(err => {
+        console.error('❌ Erro ao carregar eventos do pet:', err);
+      });
   }, [selectedPet]);
 
   const handleCheckIn = () => {
@@ -71,12 +94,11 @@ export default function TutorHome() {
   };
 
   const handleLogout = () => {
-    ['usuario_admin','usuario_tutor','usuario_cliente','token','user','logado']
+    ['usuario_admin', 'usuario_tutor', 'usuario_cliente', 'token', 'user', 'logado']
       .forEach(k => localStorage.removeItem(k));
     navigate('/');
   };
 
-  // Retorna nome do pet a partir do ID
   const getPetName = petId => {
     const pet = pets.find(p => String(p._id) === String(petId));
     return pet ? pet.nome : '—';
@@ -97,6 +119,9 @@ export default function TutorHome() {
               <h5 className="mb-0">Meus Pets</h5>
             </Card.Header>
             <ListGroup variant="flush">
+              {pets.length === 0 && (
+                <ListGroup.Item>Nenhum pet encontrado.</ListGroup.Item>
+              )}
               {pets.map(p => (
                 <ListGroup.Item
                   key={p._id}
@@ -130,7 +155,6 @@ export default function TutorHome() {
               {eventos.length === 0 && (
                 <ListGroup.Item>Nenhum evento registrado.</ListGroup.Item>
               )}
-
               {eventos.map(evt => (
                 <ListGroup.Item
                   key={evt._id}

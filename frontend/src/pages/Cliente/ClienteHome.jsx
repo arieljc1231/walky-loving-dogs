@@ -1,9 +1,8 @@
 // src/pages/Cliente/ClienteHome.jsx
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import api from '../../services/api';
+import { useNavigate }            from 'react-router-dom';
+import api                        from '../../services/api';
 
-// Formata ISO para dd/MM/yyyy HH:mm
 const formatDateTime = iso =>
   new Date(iso).toLocaleString('pt-BR', {
     day   : '2-digit',
@@ -15,10 +14,10 @@ const formatDateTime = iso =>
 
 export default function ClienteHome() {
   const navigate = useNavigate();
-  const [dono, setDono] = useState(null);
+  const [dono, setDono]         = useState(null);
   const [meusPets, setMeusPets] = useState([]);
   const [meusEventos, setMeusEventos] = useState([]);
-  const [filtroPet, setFiltroPet] = useState(null);
+  const [filtroPet, setFiltroPet]     = useState(null);
 
   useEffect(() => {
     const usuarioStr = localStorage.getItem('usuario_cliente');
@@ -27,39 +26,38 @@ export default function ClienteHome() {
       return navigate('/login-cliente');
     }
     const usuario = JSON.parse(usuarioStr);
+
+    // injeta token
     api.defaults.headers.common['Authorization'] = `Bearer ${usuario.token}`;
 
     (async () => {
       try {
-        // 1) Busca dados do dono
+        // 1) dados do dono
         const { data: donoData } = await api.get(`/donos/${usuario._id}`);
         setDono(donoData);
 
-        // 2) Busca todos os pets deste dono
-        const { data: petsData } = await api.get(`/pets?dono=${usuario._id}`);
+        // 2) pets do dono via nova rota
+        const { data: petsData } = await api.get(`/pets/dono/${usuario._id}`);
         setMeusPets(petsData);
 
-        // 3) Para cada pet, busca eventos e anexa petName
+        // 3) eventos de cada pet
         const eventosPorPet = await Promise.all(
           petsData.map(pet =>
-            api.get(`/eventos/pet/${pet._id}`)
-              .then(res =>
-                res.data.map(evt => ({ ...evt, petName: pet.nome }))
-              )
+            api.get(`/eventos/pet/${pet._id}`).then(res =>
+              res.data.map(evt => ({ ...evt, petName: pet.nome }))
+            )
           )
         );
-        // Achata e ordena por dataEntrada desc
+
         const allEventos = eventosPorPet
           .flat()
-          .sort(
-            (a, b) =>
-              new Date(b.dataEntrada) - new Date(a.dataEntrada)
-          );
+          .sort((a, b) => new Date(b.dataEntrada) - new Date(a.dataEntrada));
+
         setMeusEventos(allEventos);
 
       } catch (err) {
         console.error('Erro ao carregar dados do cliente:', err);
-        alert('Erro ao carregar dados.');
+        alert('Erro ao carregar dados. Faça login novamente.');
         navigate('/login-cliente');
       }
     })();
@@ -74,14 +72,12 @@ export default function ClienteHome() {
     return <div className="container mt-4"><p>Carregando perfil...</p></div>;
   }
 
-  // Filtra eventos se um pet foi selecionado
   const eventosExibidos = filtroPet
     ? meusEventos.filter(evt => evt.pet === filtroPet)
     : meusEventos;
 
   return (
     <div className="container mt-4">
-      {/* Cabeçalho */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h2>Painel do Cliente</h2>
         <button className="btn btn-secondary" onClick={handleLogout}>
@@ -90,13 +86,11 @@ export default function ClienteHome() {
       </div>
 
       <div className="row">
-        {/* Coluna esquerda: dados do dono e pets */}
+        {/* Coluna esquerda */}
         <div className="col-md-4">
-          {/* Meus Dados */}
+          {/* Dados do dono */}
           <div className="card mb-4">
-            <div className="card-header bg-white border-0">
-              <h5 className="mb-0">Meus Dados</h5>
-            </div>
+            <div className="card-header bg-white border-0"><h5>Meus Dados</h5></div>
             <ul className="list-group list-group-flush">
               <li className="list-group-item"><strong>Nome:</strong> {dono.nome}</li>
               <li className="list-group-item"><strong>E-mail:</strong> {dono.email}</li>
@@ -106,11 +100,9 @@ export default function ClienteHome() {
             </ul>
           </div>
 
-          {/* Meus Pets */}
+          {/* Lista de pets */}
           <div className="card">
-            <div className="card-header bg-white border-0">
-              <h5 className="mb-0">Meus Pets</h5>
-            </div>
+            <div className="card-header bg-white border-0"><h5>Meus Pets</h5></div>
             <ul className="list-group list-group-flush">
               <li
                 className={`list-group-item ${!filtroPet ? 'active' : ''}`}
@@ -119,6 +111,9 @@ export default function ClienteHome() {
               >
                 Todos Pets
               </li>
+              {meusPets.length === 0 && (
+                <li className="list-group-item">Nenhum pet cadastrado.</li>
+              )}
               {meusPets.map(pet => (
                 <li
                   key={pet._id}
@@ -136,9 +131,7 @@ export default function ClienteHome() {
         {/* Coluna direita: eventos */}
         <div className="col-md-8">
           <div className="card">
-            <div className="card-header bg-white border-0">
-              <h5 className="mb-0">Meus Eventos</h5>
-            </div>
+            <div className="card-header bg-white border-0"><h5>Meus Eventos</h5></div>
             <ul className="list-group list-group-flush">
               {eventosExibidos.length === 0 ? (
                 <li className="list-group-item">Nenhum evento registrado.</li>
@@ -159,9 +152,7 @@ export default function ClienteHome() {
                       </div>
                     </div>
                     {evt.observacoes && (
-                      <div className="mt-2">
-                        <em>Observações:</em> {evt.observacoes}
-                      </div>
+                      <div className="mt-2"><em>Observações:</em> {evt.observacoes}</div>
                     )}
                   </li>
                 ))

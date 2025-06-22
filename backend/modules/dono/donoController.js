@@ -1,6 +1,7 @@
 // modules/dono/donoController.js
 const Dono = require('./donoModel');
 const { sendWelcomeEmail } = require('../../services/mail');
+const Pet = require('../pet/petModel');
 
 // Criar Dono (com e-mail de boas-vindas)
 exports.criarDono = async (req, res) => {
@@ -67,19 +68,37 @@ exports.excluirDono = async (req, res) => {
 exports.loginDono = async (req, res) => {
   const { email, senha } = req.body;
   try {
-    const dono = await Dono.findOne({ email, senha });
-    if (!dono) {
+    const dono = await Dono.findOne({ email });
+
+    if (!dono || dono.senha !== senha) {
       return res.status(401).json({ mensagem: 'Email ou senha inválidos.' });
     }
+
     res.json({
-      _id:    dono._id,
-      nome:   dono.nome,
-      email:  dono.email,
+      _id: dono._id,
+      nome: dono.nome,
+      email: dono.email,
       perfil: 'dono',
-      // se usar JWT, gere aqui e envie token
       token: dono.token || null
     });
   } catch (err) {
     res.status(500).json({ mensagem: 'Erro ao realizar login.', erro: err });
+  }
+};
+
+// Listar apenas Donos que possuem pets
+exports.listarDonosComPets = async (req, res) => {
+  try {
+    const donos = await Dono.find();
+    const donosComPets = [];
+
+    for (const dono of donos) {
+      const temPet = await Pet.exists({ dono: dono._id });
+      if (temPet) donosComPets.push(dono);
+    }
+
+    res.json(donosComPets);
+  } catch (err) {
+    res.status(500).json({ erro: 'Erro ao buscar donos com pets' });
   }
 };

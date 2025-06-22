@@ -1,7 +1,7 @@
 // backend/modules/pet/petController.js
 
 const Pet  = require('./petModel');
-const Dono = require('../dono/donoModel');  // ajuste o path para onde está seu donoModel
+const Dono = require('../dono/donoModel');
 
 // Criar Pet
 exports.criarPet = async (req, res) => {
@@ -22,10 +22,14 @@ exports.criarPet = async (req, res) => {
   }
 };
 
-// Listar todos os Pets
+// Listar todos ou filtrar por dono/tutor via query-string
 exports.listarPets = async (req, res) => {
   try {
-    const pets = await Pet.find();
+    const filtro = {};
+    if (req.query.dono)  filtro.dono  = req.query.dono;
+    if (req.query.tutor) filtro.tutor = req.query.tutor;
+
+    const pets = await Pet.find(filtro);
     return res.json(pets);
   } catch (err) {
     return res.status(500).json({ erro: err.message });
@@ -66,15 +70,14 @@ exports.editarPet = async (req, res) => {
 // Excluir Pet
 exports.excluirPet = async (req, res) => {
   try {
-    // Antes de deletar, remova o vínculo no Dono
     const pet = await Pet.findById(req.params.id);
     if (pet) {
+      // Remove vínculo no Dono
       await Dono.findByIdAndUpdate(
         pet.dono,
         { $pull: { pets: pet._id } }
       );
     }
-
     await Pet.findByIdAndDelete(req.params.id);
     return res.json({ mensagem: 'Pet deletado com sucesso' });
   } catch (err) {
@@ -82,12 +85,22 @@ exports.excluirPet = async (req, res) => {
   }
 };
 
-// GET /api/pets/tutor/:id
+// Rota legada para listar só pets do TUTOR
 exports.listarPetsPorTutor = async (req, res) => {
   try {
     const pets = await Pet.find({ tutor: req.params.id });
-    res.status(200).json(pets);
+    return res.status(200).json(pets);
   } catch (err) {
-    res.status(500).json({ erro: 'Erro ao buscar pets do tutor' });
+    return res.status(500).json({ erro: 'Erro ao buscar pets do tutor' });
+  }
+};
+
+// Rota legada para listar só pets do DONO
+exports.listarPetsPorDono = async (req, res) => {
+  try {
+    const pets = await Pet.find({ dono: req.params.id });
+    return res.status(200).json(pets);
+  } catch (err) {
+    return res.status(500).json({ erro: 'Erro ao buscar pets do dono' });
   }
 };
