@@ -1,8 +1,11 @@
-# node modules
-**/node_modules
+# Node modules
+/node_modules
+/backend/node_modules
+/frontend/node_modules
 
-# pasta de build do React
-frontend/build
+# Env locais
+/backend/.env
+/frontend/.env
 
-# env vars
-**/.env
+# Build React local
+/frontend/build

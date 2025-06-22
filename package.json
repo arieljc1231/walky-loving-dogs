@@ -1,0 +1,9 @@
+{
+  "name": "walkylovingdogs-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "cd backend && npm install && npm start",
+    "heroku-postbuild": "cd frontend && npm install && npm run build"
+  }
+}
