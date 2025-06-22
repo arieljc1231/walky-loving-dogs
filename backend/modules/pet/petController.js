@@ -81,3 +81,13 @@ exports.excluirPet = async (req, res) => {
     return res.status(500).json({ erro: err.message });
   }
 };
+
+// GET /api/pets/tutor/:id
+exports.listarPetsPorTutor = async (req, res) => {
+  try {
+    const pets = await Pet.find({ tutor: req.params.id });
+    res.status(200).json(pets);
+  } catch (err) {
+    res.status(500).json({ erro: 'Erro ao buscar pets do tutor' });
+  }
+};
