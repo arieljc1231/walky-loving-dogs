@@ -5,5 +5,8 @@
   "scripts": {
     "start": "node backend/index.js",
     "heroku-postbuild": "cd frontend && npm install && npm run build"
+  },
+  "dependencies": {
+    "dotenv": "^16.5.0"
   }
 }
