@@ -9,3 +9,6 @@
 
 # Build React local
 /frontend/build
+
+# Arquivos de backup e compactados
+*.zip
