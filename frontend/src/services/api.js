@@ -1,8 +1,8 @@
-// src/services/api.js
+// frontend/src/services/api.js
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:5000/api', // ✅ Porta do backend e prefixo da API
+  baseURL: 'https://walkylovingdogs-437825ae9f55.herokuapp.com/api' // ✅ essa é a URL real do backend
 });
 
 export default api;
